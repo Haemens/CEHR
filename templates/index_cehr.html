@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur de CEHR</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_cehr.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Simulateur de Contribution Exceptionnelle sur les Hauts Revenus (CEHR)</h1>
+        
+        <div class="form-container">
+            <div class="form-group situation-familiale-group">
+                <label for="situation_familiale">Situation familiale :</label>
+                <select id="situation_familiale" class="form-select">
+                    <option value="celibataire">Célibataire / Veuf / Divorcé</option>
+                    <option value="marie">Marié / Pacsé</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="revenus_net" class="form-label">Montant net des revenus N <span class="info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="Salaires, bénéfices, revenus fonciers, etc., après déduction des frais professionnels.">i</span></label>
+                    <input type="text" class="form-control" id="revenus_net" placeholder="Ex: 500 000" value="0" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="rfr_n1" class="form-label">Revenu fiscal de référence N-1 <span class="info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="Indiqué sur votre avis d'imposition de l'année N-1.">i</span></label>
+                    <input type="text" class="form-control" id="rfr_n1" placeholder="Ex: 200 000" value="0" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="charges_deductibles" class="form-label">Charges déductibles N <span class="field-status">(facultatif)</span> <span class="info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="Pensions alimentaires, cotisations épargne retraite (PER), etc.">i</span></label>
+                    <input type="text" class="form-control" id="charges_deductibles" placeholder="0" value="0">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="rfr_n2" class="form-label">Revenu fiscal de référence N-2 <span class="info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="Indiqué sur votre avis d'imposition de l'année N-2.">i</span></label>
+                    <input type="text" class="form-control" id="rfr_n2" placeholder="Ex: 150 000" value="0" required>
+                </div>
+            </div>
+
+            <fieldset class="form-group-section mt-3">
+                <legend>Autres composantes du revenu N (facultatif)</legend>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="revenus_exoneres" class="form-label">Revenus exonérés d'IR <span class="info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="Certains produits d'épargne (Livret A), pourboires, etc., à réintégrer pour le RFR.">i</span></label>
+                        <input type="text" class="form-control" id="revenus_exoneres" placeholder="0" value="0">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="abattements" class="form-label">Abattements spécifiques <span class="info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="Abattement de 40% sur dividendes (si option barème), abattements pour personnes âgées/invalides, etc.">i</span></label>
+                        <input type="text" class="form-control" id="abattements" placeholder="0" value="0">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="plus_values_liberatoires" class="form-label">Revenus au PFU <span class="info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="Revenus de capitaux mobiliers, plus-values sur valeurs mobilières ayant opté pour le PFU (30%).">i</span></label>
+                        <input type="text" class="form-control" id="plus_values_liberatoires" placeholder="0" value="0">
+                    </div>
+                </div>
+            </fieldset>
+
+            <button id="simulateBtn" class="btn btn-primary">Lancer la simulation</button>
+
+            <p class="disclaimer">Les montants calculés sont donnés à titre indicatif et n'engagent pas le cabinet.</p>
+        </div>
+
+        <div id="results-container" class="results-container" style="display:none;">
+            <h2>Résultats de la simulation</h2>
+            <div id="results-content"></div>
+        </div>
+
+        <div id="error-container" class="error-container" style="display:none;">
+            <p id="error-message"></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialisation des tooltips Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+                function formatNumber(input) {
+            let value = input.value.replace(/\s/g, '');
+            if (!isNaN(value) && value.length > 0) {
+                input.value = parseInt(value, 10).toLocaleString('fr-FR').replace(/\./g, ' ');
+            }
+        }
+
+        const numberInputs = ['revenus_net', 'charges_deductibles', 'revenus_exoneres', 'abattements', 'plus_values_liberatoires', 'rfr_n1', 'rfr_n2'];
+        numberInputs.forEach(id => {
+            const inputElement = document.getElementById(id);
+            if (inputElement) {
+                inputElement.addEventListener('input', () => formatNumber(inputElement));
+            }
+        });
+
+        function getNumericValue(id) {
+            const value = document.getElementById(id).value.replace(/\s/g, '');
+            return parseFloat(value) || 0;
+        }
+
+        document.getElementById('simulateBtn').addEventListener('click', function() {
+            const data = {
+                situation_familiale: document.getElementById('situation_familiale').value,
+                revenus_net: getNumericValue('revenus_net'), 
+                charges_deductibles: getNumericValue('charges_deductibles'), 
+                revenus_exoneres: getNumericValue('revenus_exoneres'), 
+                abattements: getNumericValue('abattements'), 
+                plus_values_liberatoires: getNumericValue('plus_values_liberatoires'), 
+                rfr_n1: getNumericValue('rfr_n1'), 
+                rfr_n2: getNumericValue('rfr_n2') 
+            };
+
+            fetch('/simulate_cehr', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(results => {
+                document.getElementById('error-container').style.display = 'none';
+                document.getElementById('results-container').style.display = 'block';
+                displayResults(results);
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                document.getElementById('results-container').style.display = 'none';
+                document.getElementById('error-container').style.display = 'block';
+                document.getElementById('error-message').innerText = 'Une erreur est survenue lors de la communication avec le serveur.';
+            });
+        });
+
+        function displayResults(results) {
+            const resultsContent = document.getElementById('results-content');
+            if (results.status === 'error') {
+                resultsContent.innerHTML = `<p class="error-message">Erreur: ${results.message}</p>`;
+                return;
+            }
+
+            let html = `
+                <div class="result-item">
+                    <span>Revenu Fiscal de Référence N (calculé) :</span>
+                    <strong>${formatCurrency(results.rfr_n)}</strong>
+                </div>
+                <hr>
+                <div class="result-item">
+                    <span>CEHR (calcul de base) :</span>
+                    <strong>${formatCurrency(results.cehr_base)}</strong>
+                </div>
+            `;
+
+            if (results.lissage_applicable) {
+                html += `
+                    <div class="result-item lissage-section">
+                        <p><strong>Le mécanisme de lissage est applicable.</strong></p>
+                        <span>Base de calcul lissée :</span>
+                        <span>${formatCurrency(results.base_lissee)}</span>
+                        <span>Cotisation sur base lissée :</span>
+                        <span>${formatCurrency(results.cehr_lissee_intermediaire)}</span>
+                        <span>Montant de comparaison (cotisation x 2) :</span>
+                        <strong>${formatCurrency(results.cehr_lissee_comparaison)}</strong>
+                    </div>
+                `;
+            } else {
+                 html += `
+                    <div class="result-item lissage-section">
+                        <p><strong>Le mécanisme de lissage n'est pas applicable</strong></p>
+                    </div>
+                `;
+            }
+
+            html += `
+                <hr>
+                <div class="result-item final-result">
+                    <span>Montant final de la CEHR :</span>
+                    <strong>${formatCurrency(results.cehr_finale)}</strong>
+                </div>
+            `;
+
+            if (results.economie_fiscale > 0) {
+                html += `
+                    <div class="result-item economie-result">
+                        <span>Économie fiscale grâce au lissage :</span>
+                        <strong>${formatCurrency(results.economie_fiscale)}</strong>
+                    </div>
+                `;
+            }
+
+            resultsContent.innerHTML = html;
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
+        }
+
+
+    </script>
+</body>
+</html>

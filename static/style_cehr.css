@@ -1,0 +1,212 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+}
+
+.form-container, .results-container {
+    margin-top: 20px;
+}
+
+.form-container, .results-lissage {
+    margin-top: 15px;
+    text-align: center;
+}
+
+h2 {
+    color: #34495e;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.situation-familiale-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+.situation-familiale-group select {
+    width: auto;
+    flex-grow: 1;
+}
+
+.situation-familiale-group label {
+    margin-bottom: 0;
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+}
+
+input.form-control[type="text"] {
+    text-align: right;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+button#simulateBtn.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background-color: #0050a0;
+    border-color: #0050a0;
+    font-size: 1.1em;
+    margin-top: 1rem;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+button#simulateBtn.btn-primary:hover {
+    background-color: #003d7a;
+    border-color: #003d7a;
+}
+
+.results-container {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #fdfdfd;
+    border: 1px solid #e7e7e7;
+    border-radius: 8px;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.result-item span {
+    font-size: 1.1em;
+}
+
+.result-item strong {
+    color: #2c3e50;
+    font-size: 1.1em;
+}
+
+.lissage-section {
+    background-color: #eaf5fd;
+    padding: 15px;
+    margin: 15px -15px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.lissage-section p {
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-size: 1.1em;
+    color: #2980b9;
+}
+
+.final-result strong {
+    color: #0050a0; /* Bleu institutionnel */
+    font-weight: 700;
+}
+
+.economie-result strong {
+    color: #e67e22;
+    font-weight: 700;
+}
+
+.error-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #fbeae5;
+    border: 1px solid #e74c3c;
+    border-radius: 5px;
+    color: #c0392b;
+    text-align: center;
+}
+
+.error-message {
+    color: #c0392b;
+    font-weight: bold;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: #e0e0e0;
+    margin: 20px 0;
+}
+
+fieldset.form-group-section {
+    border: 1px solid #e9ecef;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.form-group-section legend {
+    font-weight: 600;
+    color: #34495e;
+    padding: 0 10px;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.info-tooltip {
+    display: inline-block;
+    cursor: pointer;
+    background-color: #0050a0;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    font-weight: 500;
+    line-height: 16px;
+    font-size: 11px;
+    margin-left: 8px;
+}
+
+.field-status {
+    font-size: 0.8em;
+    font-weight: 400;
+    color: #7f8c8d;
+    margin-left: 5px;
+}
+
+.disclaimer {
+    font-size: 0.8em;
+    color: #7f8c8d;
+    text-align: center;
+    margin-top: 20px;
+}
